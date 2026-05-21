@@ -314,24 +314,6 @@ final class GameController extends Controller
             ]);
         }
 
-        $pdo = Database::connection();
-            $game = $this->findGameDetail($pdo, $id);
-
-            if (!$game) {
-                http_response_code(404);
-            echo 'Game not found.';
-            return;
-        }
-
-        $catalogs = $this->loadCatalogs($pdo);
-
-            $this->render('games/edit', [
-            'title' => 'Edit Game',
-            'game' => $game,
-            'catalogs' => $catalogs,
-        ]);
-        }
-
         public function update(): never
         {
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
