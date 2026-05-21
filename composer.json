@@ -1,0 +1,19 @@
+{
+  "name": "diver/gamepublisher-hub",
+  "description": "MVC project for publishing video games with PHP and PostgreSQL/Supabase",
+  "type": "project",
+  "require": {
+    "php": "^8.2",
+    "vlucas/phpdotenv": "^5.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    }
+  },
+  "scripts": {
+    "post-autoload-dump": [
+      "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+    ]
+  }
+}
