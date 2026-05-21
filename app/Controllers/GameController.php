@@ -157,41 +157,18 @@ final class GameController extends Controller
             $status = $simulatePayment ? 'pending_review' : 'draft';
             $paymentStatus = $simulatePayment ? 'paid' : 'unpaid';
 
-            $stmt = $pdo->prepare(<<<SQL
+            $stmt = $pdo->prepare("
             insert into public.games (
-                slug,
-                title,
-                studio,
-                short_description,
-                price,
-                publication_fee,
-                age_rating,
-                status,
-                payment_status,
-                release_date,
-                banner_path,
-                cover_path,
-                accent_color,
-                published_at
+                slug, title, studio, short_description, price, publication_fee,
+                age_rating, status, payment_status, release_date, banner_path,
+                cover_path, accent_color, published_at
             ) values (
-                :slug,
-                :title,
-                :studio,
-                :short_description,
-                :price,
-                :publication_fee,
-                :age_rating,
-                :status,
-                :payment_status,
-                :release_date,
-                :banner_path,
-                :cover_path,
-                :accent_color,
-                :published_at
+                :slug, :title, :studio, :short_description, :price, :publication_fee,
+                :age_rating, :status, :payment_status, :release_date, :banner_path,
+                :cover_path, :accent_color, :published_at
             )
             returning id
-            SQL
-            );
+            ");
 
             $stmt->execute([
                 ':slug' => $slug,
@@ -220,24 +197,13 @@ final class GameController extends Controller
             }
 
             if ($simulatePayment) {
-                $paymentStmt = $pdo->prepare(<<<SQL
+                $paymentStmt = $pdo->prepare("
                 insert into public.payments (
-                    game_id,
-                    amount,
-                    method,
-                    status,
-                    transaction_ref,
-                    paid_at
+                    game_id, amount, method, status, transaction_ref, paid_at
                 ) values (
-                    :game_id,
-                    :amount,
-                    :method,
-                    :status,
-                    :transaction_ref,
-                    :paid_at
+                    :game_id, :amount, :method, :status, :transaction_ref, :paid_at
                 )
-                SQL
-                );
+                ");
 
                 $paymentStmt->execute([
                     ':game_id' => $gameId,
@@ -403,7 +369,7 @@ final class GameController extends Controller
             $status = $simulatePayment ? 'pending_review' : ($existing['status'] ?? 'draft');
             $paymentStatus = $simulatePayment ? 'paid' : ($existing['payment_status'] ?? 'unpaid');
 
-            $stmt = $pdo->prepare(<<<SQL
+            $stmt = $pdo->prepare("
             update public.games
             set
             title = :title,
@@ -420,8 +386,7 @@ final class GameController extends Controller
                 accent_color = :accent_color,
                 published_at = coalesce(published_at, :published_at)
             where id = :id
-            SQL
-            );
+            ");
 
             $stmt->execute([
                 ':id' => $id,
@@ -445,24 +410,13 @@ final class GameController extends Controller
             $this->syncManyToMany($pdo, 'public.game_tags', 'game_id', 'tag_id', $id, $data['tags'] ?? []);
 
             if ($simulatePayment) {
-                $paymentStmt = $pdo->prepare(<<<SQL
+                $paymentStmt = $pdo->prepare("
                 insert into public.payments (
-                    game_id,
-                    amount,
-                    method,
-                    status,
-                    transaction_ref,
-                    paid_at
+                    game_id, amount, method, status, transaction_ref, paid_at
                 ) values (
-                    :game_id,
-                    :amount,
-                    :method,
-                    :status,
-                    :transaction_ref,
-                    :paid_at
+                    :game_id, :amount, :method, :status, :transaction_ref, :paid_at
                 )
-                SQL
-                );
+                ");
 
                 $paymentStmt->execute([
                     ':game_id' => $id,
@@ -540,19 +494,10 @@ final class GameController extends Controller
         $countStmt->execute();
         $total = (int) $countStmt->fetchColumn();
 
-        $sql = <<<SQL
+        $sql = "
         select
-        g.id,
-        g.slug,
-        g.title,
-        g.studio,
-        g.price,
-        g.status,
-        g.payment_status,
-        g.accent_color,
-        g.banner_path,
-        g.cover_path,
-        g.created_at,
+        g.id, g.slug, g.title, g.studio, g.price, g.status, g.payment_status,
+        g.accent_color, g.banner_path, g.cover_path, g.created_at,
         coalesce(string_agg(distinct ge.name, ', '), '') as genres,
         coalesce(string_agg(distinct pl.name, ', '), '') as platforms,
         coalesce(string_agg(distinct tg.name, ', '), '') as tags
@@ -567,7 +512,7 @@ final class GameController extends Controller
         group by g.id
         order by g.created_at desc
         limit :limit offset :offset
-        SQL;
+        ";
 
         $stmt = $pdo->prepare($sql);
 
@@ -584,7 +529,7 @@ final class GameController extends Controller
 
     private function findGameDetail(PDO $pdo, string $id): array|false
     {
-        $stmt = $pdo->prepare(<<<SQL
+        $stmt = $pdo->prepare("
         select
         g.*,
         coalesce(string_agg(distinct ge.name, ', '), '') as genres,
@@ -600,8 +545,7 @@ final class GameController extends Controller
                               where g.id = :id
                               group by g.id
                               limit 1
-                              SQL
-        );
+                              ");
 
         $stmt->execute([':id' => $id]);
         return $stmt->fetch() ?: false;
